@@ -70,6 +70,7 @@ type Client struct {
 	targetURL       string
 	disableSessions bool
 	rememberDevice  bool
+	skipVerify      bool
 }
 
 // AuthRequest represents an mfa okta request
@@ -141,6 +142,7 @@ func New(idpAccount *cfg.IDPAccount) (*Client, error) {
 		targetURL:       idpAccount.TargetURL,
 		disableSessions: disableSessions,
 		rememberDevice:  rememberDevice,
+		skipVerify:      idpAccount.SkipVerify,
 	}, nil
 }
 
@@ -1435,7 +1437,7 @@ func verifyTrustedCert(oc *Client, doc *goquery.Document, duoHost string, duoSub
 
 	// The locally running certifier does not have a valid certificate, so we have to skip verification
 	customTransport := http.DefaultTransport.(*http.Transport).Clone()
-	customTransport.TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
+	customTransport.TLSClientConfig = &tls.Config{InsecureSkipVerify: oc.skipVerify}
 	originalTransport := oc.client.Transport
 
 	oc.client.Transport = customTransport
