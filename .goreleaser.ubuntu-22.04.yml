@@ -58,6 +58,8 @@ archives:
     name_template: "{{ .ProjectName }}_static_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
 checksum:
   name_template: "{{ .ProjectName }}_{{ .Version }}_checksums.txt"
+changelog:
+  disable: true
 dockers:
   - id: amd64
     goos: linux
