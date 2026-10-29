@@ -22,9 +22,18 @@ jobs:
         with:
           go-version-file: "go.mod"
 
+      # TODO: pkg/provider/browser is excluded for now. Its tests download the Playwright
+      # driver (v1.47.2) from playwright*.azureedge.net, which Microsoft has retired, so every
+      # download returns 404. Re-enable once playwright-go is upgraded to a release that
+      # fetches the driver from npm (the module moved to github.com/mxschmitt/playwright-go).
+      #
+      # On macOS, Go 1.22 test binaries lack the LC_UUID load command and current macOS
+      # refuses to load them; the external linker adds it.
       - name: Test
         run: |
-          go test -v ./... -coverprofile=${{ matrix.os }}_coverage.txt -covermode=atomic
+          LDFLAGS=""
+          if [ "$RUNNER_OS" = "macOS" ]; then LDFLAGS="-ldflags=-linkmode=external"; fi
+          go test -v $LDFLAGS -coverprofile=${{ matrix.os }}_coverage.txt -covermode=atomic $(go list ./... | grep -v /pkg/provider/browser)
 
       - name: Upload coverage report
         uses: actions/upload-artifact@v4
